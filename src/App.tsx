@@ -48,14 +48,25 @@ function App() {
       <WebGLShader />
 
       <div className="min-h-screen p-8 text-foreground" dir="rtl">
-        <header className="mb-12 text-center">
-          <div className="flex justify-center mb-2">
-            <img src="./image.png" alt="Nashmi Logo" className="w-48 h-48 md:w-56 md:h-56 object-contain drop-shadow-[0_0_20px_rgba(134,59,255,0.4)] hover:scale-105 transition-transform duration-300" />
+        <header className="mb-12 text-center relative flex flex-col items-center justify-center min-h-[300px]">
+          {/* Logo in the background */}
+          <div className="absolute inset-0 flex justify-center items-center pointer-events-none z-0">
+            <img 
+              src="./image.png" 
+              alt="Nashmi Logo" 
+              className="w-64 h-64 md:w-80 md:h-80 object-contain opacity-80 drop-shadow-[0_0_40px_rgba(134,59,255,0.6)] mix-blend-screen" 
+            />
           </div>
-          <h1 className="text-5xl font-extrabold tracking-tight lg:text-6xl mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 drop-shadow-sm">
-            Nashmi Games
-          </h1>
-          <p className="text-xl text-muted-foreground">اختار اللعبة اللي بدك ياها والعب مباشرة</p>
+          
+          {/* Text in the foreground */}
+          <div className="relative z-10 flex flex-col items-center mt-8">
+            <h1 className="text-6xl font-black tracking-tight lg:text-8xl mb-6 text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.9)]">
+              Nashmi Games
+            </h1>
+            <p className="text-xl text-white font-semibold bg-black/40 px-6 py-2 rounded-full backdrop-blur-md border border-white/20 shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+              اختار اللعبة اللي بدك ياها والعب مباشرة
+            </p>
+          </div>
         </header>
 
         <main className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-10">
