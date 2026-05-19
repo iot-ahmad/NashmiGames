@@ -35,7 +35,8 @@ const games = [
   { title: "Classic Two Player Chess", path: "./classic-two-player-chess/dist/index.html" },
   { title: "Irbid Runner", path: "./remix_-irbid-runner/dist/index.html" },
   { title: "Voxel Architect", path: "./snake-game_tcw/voxel-toy-box/dist/index.html" },
-  { title: "Multiplayer Neon Snake", path: "./spell-caster/multiplayer-neon-snake/dist/index.html" }
+  { title: "Multiplayer Neon Snake", path: "./spell-caster/multiplayer-neon-snake/dist/index.html" },
+  { title: "Slingshot", path: "./slingshot/dist/index.html" }
 ];
 
 function App() {

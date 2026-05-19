@@ -29,7 +29,8 @@ const games = [
   "VR Sonic",
   "xo-game",
   "classic-two-player-chess",
-  "remix_-irbid-runner"
+  "remix_-irbid-runner",
+  "slingshot"
 ];
 
 console.log("Copying game assets to dist...");
