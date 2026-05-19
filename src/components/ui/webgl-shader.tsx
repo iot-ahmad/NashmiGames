@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export function WebGLShader() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [retryKey, setRetryKey] = useState(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -12,6 +13,19 @@ export function WebGLShader() {
       console.warn("WebGL not supported in this browser.")
       return
     }
+
+    const handleContextLost = (e: Event) => {
+      e.preventDefault() // Request context restoration
+      console.warn("WebGL context lost. Waiting for restore...")
+    }
+
+    const handleContextRestored = () => {
+      console.log("WebGL context restored. Re-initializing...")
+      setRetryKey(prev => prev + 1)
+    }
+
+    canvas.addEventListener("webglcontextlost", handleContextLost, false)
+    canvas.addEventListener("webglcontextrestored", handleContextRestored, false)
 
     // Get WebGL lose context extension to cleanly dispose GPU resources on unmount
     const glLoseContext = gl.getExtension("WEBGL_lose_context")
@@ -114,7 +128,7 @@ export function WebGLShader() {
     }
 
     function render() {
-      if (!gl || !program) return
+      if (!gl || !program || gl.isContextLost()) return
       
       resize()
 
@@ -143,6 +157,9 @@ export function WebGLShader() {
     return () => {
       cancelAnimationFrame(animationId)
       window.removeEventListener("resize", resize)
+      canvas.removeEventListener("webglcontextlost", handleContextLost)
+      canvas.removeEventListener("webglcontextrestored", handleContextRestored)
+      
       if (gl) {
         try { gl.deleteBuffer(buffer) } catch (e) {}
         try { gl.deleteProgram(program) } catch (e) {}
@@ -154,13 +171,15 @@ export function WebGLShader() {
         }
       }
     }
-  }, [])
+  }, [retryKey])
 
   return (
     <canvas
+      key={retryKey}
       ref={canvasRef}
       className="fixed top-0 left-0 w-full h-full block"
       style={{ zIndex: -1, opacity: 0.6, pointerEvents: 'none' }}
     />
   )
 }
+
