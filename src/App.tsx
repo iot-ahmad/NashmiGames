@@ -94,6 +94,7 @@ function App() {
             <div className="flex-1 bg-black/60 rounded-xl overflow-hidden min-h-[500px] border border-white/5 relative">
               {currentGame ? (
                 <iframe
+                  key={currentGame.path}
                   title="game-player"
                   src={currentGame.path}
                   className="w-full h-full absolute inset-0"

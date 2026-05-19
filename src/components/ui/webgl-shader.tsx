@@ -8,19 +8,29 @@ export function WebGLShader() {
     const canvas = canvasRef.current
     if (!canvas) return
 
+    let retryTimeout: number | undefined;
+
     const gl = canvas.getContext("webgl") || (canvas.getContext("experimental-webgl") as WebGLRenderingContext | null)
     if (!gl) {
-      console.warn("WebGL not supported in this browser.")
-      return
+      console.warn("WebGL not supported or context limit reached. Retrying in 5 seconds...");
+      retryTimeout = window.setTimeout(() => {
+        setRetryKey(prev => prev + 1);
+      }, 5000);
+      return () => clearTimeout(retryTimeout);
     }
 
     const handleContextLost = (e: Event) => {
       e.preventDefault() // Request context restoration
-      console.warn("WebGL context lost. Waiting for restore...")
+      console.warn("WebGL context lost. Waiting for restore or forcing retry...")
+      // If the browser doesn't natively trigger 'webglcontextrestored', we force a retry
+      retryTimeout = window.setTimeout(() => {
+        setRetryKey(prev => prev + 1);
+      }, 3000);
     }
 
     const handleContextRestored = () => {
       console.log("WebGL context restored. Re-initializing...")
+      if (retryTimeout) clearTimeout(retryTimeout);
       setRetryKey(prev => prev + 1)
     }
 
@@ -159,6 +169,7 @@ export function WebGLShader() {
       window.removeEventListener("resize", resize)
       canvas.removeEventListener("webglcontextlost", handleContextLost)
       canvas.removeEventListener("webglcontextrestored", handleContextRestored)
+      if (retryTimeout) clearTimeout(retryTimeout)
       
       if (gl) {
         try { gl.deleteBuffer(buffer) } catch (e) {}
