@@ -61,16 +61,18 @@ class Game {
         window.addEventListener('keydown', (e) => this.keys[e.key] = true);
         window.addEventListener('keyup', (e) => this.keys[e.key] = false);
 
-        document.getElementById('btn-continue').addEventListener('click', () => this.startGame());
-        document.getElementById('btn-endless').addEventListener('click', () => this.startGame(true));
-        document.getElementById('btn-retry').addEventListener('click', () => this.startGame());
-        document.getElementById('btn-quit').addEventListener('click', () => this.showMenu());
+        document.getElementById('btn-continue')?.addEventListener('click', () => this.startGame());
+        document.getElementById('btn-endless')?.addEventListener('click', () => this.startGame(true));
+        document.getElementById('btn-retry')?.addEventListener('click', () => this.startGame());
+        document.getElementById('btn-menu')?.addEventListener('click', () => this.showMenu());
 
-        const volumeSlider = document.getElementById('volume-slider');
-        volumeSlider.addEventListener('input', (e) => {
-            this.volume = e.target.value / 100;
-            // In a real game, update audio engine volume here
-        });
+        const volumeSlider = document.getElementById('vol-slider');
+        if (volumeSlider) {
+            volumeSlider.addEventListener('input', (e) => {
+                this.volume = e.target.value / 100;
+                // In a real game, update audio engine volume here
+            });
+        }
     }
 
     showMenu() {
