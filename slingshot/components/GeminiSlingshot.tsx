@@ -85,6 +85,28 @@ const GeminiSlingshot: React.FC = () => {
   const [availableColors, setAvailableColors] = useState<BubbleColor[]>([]);
   const [aiRecommendedColor, setAiRecommendedColor] = useState<BubbleColor | null>(null);
   const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
+  const [apiKey, setApiKey] = useState<string>('');
+  const [apiKeyValue, setApiKeyValue] = useState<string>('');
+  const [apiKeySaved, setApiKeySaved] = useState<boolean>(false);
+
+  // Load API key from local storage on mount
+  useEffect(() => {
+    const storedKey = localStorage.getItem('gemini_api_key') || '';
+    setApiKey(storedKey);
+    setApiKeyValue(storedKey);
+  }, []);
+
+  const handleApiKeyChange = (val: string) => {
+    setApiKeyValue(val);
+    setApiKeySaved(false);
+  };
+
+  const handleSaveApiKey = () => {
+    localStorage.setItem('gemini_api_key', apiKeyValue.trim());
+    setApiKey(apiKeyValue.trim());
+    setApiKeySaved(true);
+    setTimeout(() => setApiKeySaved(false), 3000);
+  };
 
   // Sync state to ref
   useEffect(() => {
@@ -937,6 +959,36 @@ const GeminiSlingshot: React.FC = () => {
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            
+            {/* API Configuration Section */}
+            <div>
+                <div className="flex items-center gap-2 mb-2 text-[#c4c7c5] text-xs font-bold uppercase tracking-wider">
+                    <BrainCircuit className="w-3 h-3 text-[#42a5f5]" /> API Configuration
+                </div>
+                <div className="bg-[#2a2a2a]/60 border border-[#444746] rounded-lg p-3">
+                    <p className="text-[10px] text-gray-400 mb-2 leading-relaxed">
+                        Enter your Gemini API Key to enable Flash Strategy AI. It is stored securely in your browser's local storage.
+                    </p>
+                    <div className="flex gap-2">
+                        <input 
+                            type="password" 
+                            placeholder={apiKey ? "••••••••••••••••••••" : "Enter Gemini API Key..."} 
+                            value={apiKeyValue} 
+                            onChange={(e) => handleApiKeyChange(e.target.value)}
+                            className="flex-1 bg-[#121212] border border-[#444746] rounded px-3 py-1.5 text-xs text-[#e3e3e3] focus:outline-none focus:border-[#42a5f5] transition-colors"
+                        />
+                        <button 
+                            onClick={handleSaveApiKey}
+                            className="bg-[#42a5f5] hover:bg-[#64b5f6] text-black font-bold text-xs px-3 py-1.5 rounded transition-colors shrink-0"
+                        >
+                            Save
+                        </button>
+                    </div>
+                    {apiKeySaved && (
+                        <p className="text-[10px] text-[#66bb6a] mt-2 font-medium">✓ API Key saved successfully!</p>
+                    )}
+                </div>
+            </div>
             
             {/* Status Section */}
             <div>

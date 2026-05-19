@@ -6,14 +6,22 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { StrategicHint, AiResponse, DebugInfo } from "../types";
 
-// Initialize Gemini Client
-let ai: GoogleGenAI | null = null;
-
-if (process.env.API_KEY) {
-    ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-} else {
-    console.error("API_KEY is missing from environment variables.");
-}
+// Dynamic Gemini client getter
+const getGeminiClient = (): GoogleGenAI | null => {
+  let apiKey = typeof window !== 'undefined' ? localStorage.getItem("gemini_api_key") : null;
+  if (!apiKey || !apiKey.trim()) {
+    apiKey = (typeof process !== 'undefined' && process.env?.API_KEY) || 
+             (import.meta as any).env?.VITE_GEMINI_API_KEY;
+  }
+  if (apiKey && apiKey.trim()) {
+    try {
+      return new GoogleGenAI({ apiKey: apiKey.trim() });
+    } catch (e) {
+      console.error("Failed to initialize GoogleGenAI:", e);
+    }
+  }
+  return null;
+};
 
 const MODEL_NAME = "gemini-3-flash-preview";
 
@@ -43,9 +51,11 @@ export const getStrategicHint = async (
     timestamp: new Date().toLocaleTimeString()
   };
 
+  const ai = getGeminiClient();
+
   if (!ai) {
     return {
-        hint: { message: "API Key missing." },
+        hint: { message: "API Key missing. Please configure it in the Debugger panel." },
         debug: { ...debug, error: "API Key Missing" }
     };
   }
