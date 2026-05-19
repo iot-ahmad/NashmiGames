@@ -39,18 +39,18 @@ const games = [
 ];
 
 function App() {
-  const [currentGame, setCurrentGame] = useState<{title: string, path: string} | null>(null);
+  const [currentGame, setCurrentGame] = useState<{ title: string, path: string } | null>(null);
 
   console.log("App rendering, current game:", currentGame?.title || "none");
 
-  return (    
+  return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <WebGLShader />
-      
+
       <div className="min-h-screen p-8 text-foreground" dir="rtl">
         <header className="mb-12 text-center">
-          <div className="flex justify-center mb-4">
-             <img src="./image.png" alt="Nashmi Logo" className="w-24 h-24 object-contain rounded-2xl drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+          <div className="flex justify-center mb-2">
+            <img src="./image.png" alt="Nashmi Logo" className="w-48 h-48 md:w-56 md:h-56 object-contain drop-shadow-[0_0_20px_rgba(134,59,255,0.4)] hover:scale-105 transition-transform duration-300" />
           </div>
           <h1 className="text-5xl font-extrabold tracking-tight lg:text-6xl mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 drop-shadow-sm">
             Nashmi Games
@@ -64,9 +64,9 @@ function App() {
             <div className="flex flex-col gap-4">
               {games.map((game, index) => (
                 <div key={index} className="w-full" onClick={() => setCurrentGame(game)}>
-                  <LiquidMetalButton 
-                    label={game.title} 
-                    viewMode="text" 
+                  <LiquidMetalButton
+                    label={game.title}
+                    viewMode="text"
                   />
                 </div>
               ))}
@@ -79,9 +79,9 @@ function App() {
                 {currentGame ? `تلعب الآن: ${currentGame.title}` : "اختَر لعبة من القائمة"}
               </h2>
               {currentGame && (
-                <a 
-                  href={currentGame.path} 
-                  target="_blank" 
+                <a
+                  href={currentGame.path}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 transition-colors rounded-lg text-sm"
                 >
@@ -90,7 +90,7 @@ function App() {
                 </a>
               )}
             </div>
-            
+
             <div className="flex-1 bg-black/60 rounded-xl overflow-hidden min-h-[500px] border border-white/5 relative">
               {currentGame ? (
                 <iframe
