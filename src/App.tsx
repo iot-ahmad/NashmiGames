@@ -50,10 +50,10 @@ function App() {
       <div className="min-h-screen p-8 text-foreground" dir="rtl">
         <header className="mb-12 text-center">
           <div className="flex justify-center mb-4">
-             <img src="./image.png" alt="Zenith Logo" className="w-24 h-24 object-contain rounded-2xl drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+             <img src="./image.png" alt="Nashmi Logo" className="w-24 h-24 object-contain rounded-2xl drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
           </div>
           <h1 className="text-5xl font-extrabold tracking-tight lg:text-6xl mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 drop-shadow-sm">
-            Zenith Games
+            Nashmi Games
           </h1>
           <p className="text-xl text-muted-foreground">اختار اللعبة اللي بدك ياها والعب مباشرة</p>
         </header>
