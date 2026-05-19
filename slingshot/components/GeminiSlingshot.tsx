@@ -24,12 +24,12 @@ const MAX_FORCE_MULT = 0.45;
 
 // Material Design Colors & Scoring Strategy
 const COLOR_CONFIG: Record<BubbleColor, { hex: string, points: number, label: string }> = {
-  red:    { hex: '#ef5350', points: 100, label: 'Red' },     // Material Red 400
-  blue:   { hex: '#42a5f5', points: 150, label: 'Blue' },    // Material Blue 400
-  green:  { hex: '#66bb6a', points: 200, label: 'Green' },   // Material Green 400
-  yellow: { hex: '#ffee58', points: 250, label: 'Yellow' },  // Material Yellow 400
-  purple: { hex: '#ab47bc', points: 300, label: 'Purple' },  // Material Purple 400
-  orange: { hex: '#ffa726', points: 500, label: 'Orange' }   // Material Orange 400
+  red:    { hex: '#330504ff', points: 100, label: 'Red' },     // Material Red 400
+  blue:   { hex: '#062641ff', points: 150, label: 'Blue' },    // Material Blue 400
+  green:  { hex: '#073d0aff', points: 200, label: 'Green' },   // Material Green 400
+  yellow: { hex: '#645b03ff', points: 250, label: 'Yellow' },  // Material Yellow 400
+  purple: { hex: '#34003dff', points: 300, label: 'Purple' },  // Material Purple 400
+  orange: { hex: '#000000ff', points: 500, label: 'Orange' }   // Material Orange 400
 };
 
 const COLOR_KEYS: BubbleColor[] = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
