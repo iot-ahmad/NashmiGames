@@ -1027,7 +1027,7 @@ const GeminiSlingshot: React.FC = () => {
         </div>
         
         <div className="p-3 bg-[#252525] border-t border-[#444746] text-center">
-            <p className="text-[10px] text-gray-500 font-medium">Powered by Google Gemini 3 Flash</p>
+            <p className="text-[10px] text-gray-500 font-medium">Powered by Ahmad</p>
         </div>
       </div>
     </div>
