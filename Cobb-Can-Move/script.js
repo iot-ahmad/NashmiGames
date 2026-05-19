@@ -77,8 +77,9 @@ class Game {
 
     showMenu() {
         this.state = 'MENU';
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('menu-screen').classList.add('active');
+        document.querySelectorAll('.overlay').forEach(s => s.classList.remove('active'));
+        document.getElementById('hud').classList.add('hidden');
+        document.getElementById('menu-overlay').classList.add('active');
     }
 
     startGame(endless = false) {
@@ -88,8 +89,19 @@ class Game {
         this.fuel = 100;
         this.generateLevel();
         
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('game-screen').classList.add('active');
+        document.querySelectorAll('.overlay').forEach(s => s.classList.remove('active'));
+        document.getElementById('hud').classList.remove('hidden');
+        // Show rules then start
+        this.showRules();
+    }
+
+    showRules() {
+        document.getElementById('rules-overlay').classList.add('active');
+        const onKey = () => {
+            document.getElementById('rules-overlay').classList.remove('active');
+            window.removeEventListener('keydown', onKey);
+        };
+        window.addEventListener('keydown', onKey);
     }
 
     generateLevel() {
@@ -140,13 +152,16 @@ class Game {
         this.cobb.senses.reach = this.level > 4;
 
         const rulesList = document.getElementById('rules-list');
-        rulesList.innerHTML = '';
-        if (this.cobb.senses.see) rulesList.innerHTML += '<div>MUTATION: COBB CAN SEE</div>';
-        if (this.cobb.senses.hear) rulesList.innerHTML += '<div>MUTATION: COBB CAN HEAR</div>';
-        if (this.cobb.senses.smell) rulesList.innerHTML += '<div>MUTATION: COBB CAN SMELL</div>';
-        if (this.cobb.senses.reach) rulesList.innerHTML += '<div>MUTATION: COBB CAN REACH</div>';
-        
-        document.getElementById('level-indicator').textContent = `LEVEL ${this.level}`;
+        if (rulesList) {
+            rulesList.innerHTML = '';
+            if (this.cobb.senses.see) rulesList.innerHTML += '<div class="rule-item">MUTATION: COBB CAN SEE</div>';
+            if (this.cobb.senses.hear) rulesList.innerHTML += '<div class="rule-item">MUTATION: COBB CAN HEAR</div>';
+            if (this.cobb.senses.smell) rulesList.innerHTML += '<div class="rule-item">MUTATION: COBB CAN SMELL</div>';
+            if (this.cobb.senses.reach) rulesList.innerHTML += '<div class="rule-item">MUTATION: COBB CAN REACH</div>';
+        }
+
+        const levelEl = document.getElementById('hud-level');
+        if (levelEl) levelEl.textContent = `LEVEL ${this.level}`;
     }
 
     checkCollision(nx, ny) {
@@ -219,7 +234,16 @@ class Game {
         // Fuel depletion
         this.fuel -= 0.08;
         if (this.fuel <= 0) {
+            this.fuel = 0;
             this.gameOver();
+            return;
+        }
+        // Update HUD fuel bar
+        const fuelBar = document.getElementById('fuel-bar');
+        if (fuelBar) {
+            fuelBar.style.width = this.fuel + '%';
+            if (this.fuel < 25) fuelBar.classList.add('low');
+            else fuelBar.classList.remove('low');
         }
 
         // Coal pickup
@@ -250,6 +274,21 @@ class Game {
     nextLevel() {
         this.level++;
         this.generateLevel();
+        document.querySelectorAll('.overlay').forEach(s => s.classList.remove('active'));
+        document.getElementById('levelcomplete-overlay').classList.add('active');
+        const onKey = () => {
+            document.getElementById('levelcomplete-overlay').classList.remove('active');
+            window.removeEventListener('keydown', onKey);
+        };
+        window.addEventListener('keydown', onKey);
+    }
+
+    gameOver() {
+        this.state = 'GAMEOVER';
+        document.querySelectorAll('.overlay').forEach(s => s.classList.remove('active'));
+        document.getElementById('gameover-overlay').classList.add('active');
+        const sub = document.getElementById('gameover-sub');
+        if (sub) sub.textContent = this.fuel <= 0 ? 'The furnace went cold...' : 'Cobb caught you!';
     }
 
     draw() {
