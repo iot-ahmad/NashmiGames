@@ -3,32 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Mansaf Quest 2D</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<meta name="description" content="Mansaf Quest - لعبة مغامرات ممتعة لجمع مقادير المنسف الأردني الشهير">
+<title>Mansaf Quest 2D | أجمع مقادير المنسف</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="game.css">
 <script src="assets.js"></script>
 </head>
 <body>
 
 <div id="startScreen">
-  <svg class="screen-icon" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="4" fill="#e94560"/><text x="16" y="22" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">MQ</text></svg>
+  <!-- Starfield will be injected by JS -->
+  <div class="starfield" id="starfield"></div>
+
+  <svg class="screen-icon" viewBox="0 0 48 48" aria-hidden="true">
+    <defs>
+      <radialGradient id="sqg" cx="50%" cy="40%" r="60%">
+        <stop offset="0%" stop-color="#ff6b80"/>
+        <stop offset="100%" stop-color="#c0203e"/>
+      </radialGradient>
+    </defs>
+    <rect width="48" height="48" rx="12" fill="url(#sqg)"/>
+    <text x="24" y="32" text-anchor="middle" fill="#fff" font-size="20" font-weight="bold" font-family="Cairo,sans-serif">MQ</text>
+  </svg>
+
   <h1>Mansaf Quest</h1>
+  <div class="deco-line"></div>
   <h2>اجمع مقادير المنسف قبل ما تجوع!</h2>
-  <p class="ingredient-tags">رز • جميد • لبن • لحمة</p>
-  <button class="btn" onclick="startGame()">ابدأ اللعب</button>
-  <p style="color:#777;margin-top:40px;font-size:0.9em">تطوير Ahmad AL Batayneh</p>
+
+  <div class="ingredient-tags">
+    <span class="ingredient-pill">🍚 رز</span>
+    <span class="ingredient-pill">🥩 لحمة</span>
+    <span class="ingredient-pill">🫙 جميد</span>
+    <span class="ingredient-pill">🥛 لبن</span>
+  </div>
+
+  <button class="btn" id="btnStart" onclick="startGame()">ابدأ اللعب  ▶</button>
+
+  <div class="credit-text">تطوير Ahmad AL Batayneh &nbsp;·&nbsp; 16 مرحلة</div>
 </div>
 
 <div id="gameOverScreen" class="hidden">
-  <h1 style="font-size:2.5em;color:#e94560">Game Over</h1>
-  <p id="goLevel" style="color:#aaa;font-size:1.2em;margin:15px 0"></p>
-  <button class="btn" onclick="startGame()">حاول مرة ثانية</button>
+  <div class="starfield" id="starfieldGO"></div>
+  <div class="go-icon">💀</div>
+  <h1>Game Over</h1>
+  <div id="goLevel"></div>
+  <button class="btn" id="btnRetry" onclick="startGame()">حاول مرة ثانية  🔄</button>
+  <button class="btn btn-secondary" onclick="showScreen('startScreen')">القائمة الرئيسية</button>
 </div>
 
 <div id="winScreen" class="hidden">
-  <h1 style="font-size:2.5em;color:#ffd700">مبروك!</h1>
-  <p style="color:#fff;font-size:1.3em;margin:15px 0">جمعت كل مقادير المنسف! صحتين وعافية</p>
-  <button class="btn" onclick="startGame()">العب مرة ثانية</button>
+  <div class="starfield" id="starfieldWin"></div>
+  <div class="trophy">🏆</div>
+  <h1>مبروك!</h1>
+  <div class="deco-line" style="background:linear-gradient(90deg,transparent,#ffd700,transparent)"></div>
+  <p class="win-msg">جمعت كل مقادير المنسف!<br>صحتين وعافية يا بطل 🌟</p>
+  <div class="stats-grid" id="winStats">
+    <div class="stat-card"><div class="stat-val" id="statJameed">4/4</div><div class="stat-label">جميد</div></div>
+    <div class="stat-card"><div class="stat-val" id="statMeat">4/4</div><div class="stat-label">لحمة</div></div>
+    <div class="stat-card"><div class="stat-val" id="statRice">4/4</div><div class="stat-label">رز</div></div>
+    <div class="stat-card"><div class="stat-val" id="statLaban">4/4</div><div class="stat-label">لبن</div></div>
+  </div>
+  <button class="btn" id="btnWinPlay" onclick="startGame()">العب مرة ثانية  🎮</button>
 </div>
 
 <div id="gameWrap">
@@ -48,13 +84,103 @@
 </div>
 </div>
 
+<!-- Particle overlay canvas -->
+<canvas id="particleCanvas"></canvas>
+
 <div id="mobileControls">
-  <button class="mBtn" id="btnLeft">◀</button>
-  <button class="mBtn" id="btnJump">▲</button>
-  <button class="mBtn" id="btnRight">▶</button>
+  <button class="mBtn" id="btnLeft" aria-label="يسار">◀</button>
+  <button class="mBtn" id="btnJump" aria-label="قفز">▲</button>
+  <button class="mBtn" id="btnRight" aria-label="يمين">▶</button>
 </div>
 
 <script>
+// ===== STARFIELD GENERATOR =====
+function spawnStars(containerId, count = 60) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%; top:${Math.random()*100}%;
+      --dur:${2 + Math.random() * 4}s;
+      --min-op:${0.1 + Math.random()*0.3};
+      animation-delay:${Math.random()*4}s;
+    `;
+    container.appendChild(s);
+  }
+}
+spawnStars('starfield', 80);
+spawnStars('starfieldGO', 50);
+spawnStars('starfieldWin', 50);
+
+// ===== PARTICLE SYSTEM =====
+const pCanvas = document.getElementById('particleCanvas');
+const pCtx = pCanvas.getContext('2d');
+let particles = [];
+function resizeParticleCanvas() {
+  pCanvas.width = window.innerWidth;
+  pCanvas.height = window.innerHeight;
+}
+resizeParticleCanvas();
+window.addEventListener('resize', resizeParticleCanvas);
+
+function spawnParticles(wx, wy, color) {
+  // wx, wy = world-to-screen position
+  for (let i = 0; i < 10; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 60 + Math.random() * 120;
+    particles.push({
+      x: wx, y: wy,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 60,
+      life: 1.0,
+      decay: 0.9 + Math.random() * 0.6,
+      size: 3 + Math.random() * 4,
+      color: color || '#ffd700'
+    });
+  }
+}
+
+let lastPTime = 0;
+function animParticles(ts) {
+  const dt = Math.min((ts - lastPTime) / 1000, 0.05);
+  lastPTime = ts;
+  pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vy += 250 * dt;
+    p.life -= p.decay * dt;
+    if (p.life <= 0) { particles.splice(i, 1); continue; }
+    pCtx.globalAlpha = p.life;
+    pCtx.fillStyle = p.color;
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+    pCtx.fill();
+  }
+  pCtx.globalAlpha = 1;
+  requestAnimationFrame(animParticles);
+}
+requestAnimationFrame(animParticles);
+
+// Helper: world coords -> screen coords
+function worldToScreen(wx, wy) {
+  const wrap = document.getElementById('gameWrap');
+  const rect = wrap.getBoundingClientRect();
+  const scaleX = rect.width / 800;
+  const scaleY = rect.height / 600;
+  return {
+    x: rect.left + (wx) * scaleX,
+    y: rect.top  + (wy) * scaleY
+  };
+}
+
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const gameWrap = document.getElementById('gameWrap');
@@ -318,6 +444,8 @@ function checkCollisions(){
     if(!f.alive)continue;
     if(player.x+player.w>f.x&&player.x<f.x+f.w&&player.y+player.h>f.y&&player.y<f.y+f.h){
       f.alive=false; GS.falafelCount++;
+      // Particle burst on falafel collect
+      try { const scF = worldToScreen(f.x - camera.x + 8, f.y + 8); spawnParticles(scF.x, scF.y, '#ffd700'); } catch(e){}
       if(GS.falafelCount>=10&&!majorItem.visible){majorItem.visible=true;}
     }
   }
@@ -329,6 +457,12 @@ function checkCollisions(){
       majorItem.alive=false;
       const type=INGREDIENT_MAP[GS.level-1];
       GS.ingredients[type]++;
+      // Big particle burst for ingredient
+      try {
+        const scI = worldToScreen(majorItem.x - camera.x + 16, majorItem.y + 16);
+        const ingColors = {Jameed:'#c8b560',Meat:'#e05040',Rice:'#ffffaa',Laban:'#aaeeff'};
+        for(let b=0;b<3;b++) spawnParticles(scI.x, scI.y, ingColors[type]);
+      } catch(e){}
     }
   }
 
@@ -536,11 +670,27 @@ function gameLoop(ts){
   const dt=Math.min((ts-lastTime)/1000, 0.05);
   lastTime=ts;
 
-  updatePlayer(dt);
-  updateObstacles(dt);
-  if(invulnTimer>0)invulnTimer-=dt;
-  checkCollisions();
-  draw();
+  try {
+    updatePlayer(dt);
+    updateObstacles(dt);
+    if(invulnTimer>0)invulnTimer-=dt;
+    checkCollisions();
+    draw();
+  } catch(err) {
+    // Show error on canvas for debugging
+    ctx.fillStyle='rgba(0,0,0,0.85)';
+    ctx.fillRect(0,0,800,600);
+    ctx.fillStyle='#e94560';
+    ctx.font='bold 16px Cairo';
+    ctx.textAlign='left';
+    ctx.fillText('JS ERROR: ' + err.message, 10, 30);
+    ctx.fillStyle='#fff';
+    ctx.font='12px monospace';
+    const lines = (err.stack||'').split('\n');
+    lines.forEach((l,i) => ctx.fillText(l.slice(0,90), 10, 55 + i*18));
+    GS.running = false;
+    return;
+  }
 
   requestAnimationFrame(gameLoop);
 }
@@ -569,13 +719,29 @@ function startGame(){
 
 function gameOver(){
   GS.running=false;
-  document.getElementById('goLevel').textContent=`وصلت مرحلة ${GS.level}`;
+  const lvlEl = document.getElementById('goLevel');
+  lvlEl.innerHTML = `وصلت مرحلة <strong style="color:#ffd700">${GS.level}</strong> من 16`;
   showScreen('gameOverScreen');
 }
 
 function winGame(){
   GS.running=false;
+  // Update win stats display
+  document.getElementById('statJameed').textContent = `${GS.ingredients.Jameed}/4`;
+  document.getElementById('statMeat').textContent   = `${GS.ingredients.Meat}/4`;
+  document.getElementById('statRice').textContent   = `${GS.ingredients.Rice}/4`;
+  document.getElementById('statLaban').textContent  = `${GS.ingredients.Laban}/4`;
   showScreen('winScreen');
+  // Confetti burst!
+  for(let i=0;i<8;i++){
+    setTimeout(()=>{
+      spawnParticles(
+        Math.random()*window.innerWidth,
+        Math.random()*window.innerHeight*0.5,
+        ['#ffd700','#ff6b80','#aaffaa','#80cfff','#ffaa00'][Math.floor(Math.random()*5)]
+      );
+    }, i*200);
+  }
 }
 </script>
 </body>
