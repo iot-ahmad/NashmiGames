@@ -4,45 +4,49 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Mansaf Quest 2D</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;font-family:'Cairo',sans-serif}
-#gameCanvas{border:3px solid #e94560;border-radius:8px;box-shadow:0 0 30px rgba(233,69,96,0.4);image-rendering:pixelated}
-#startScreen,#gameOverScreen,#winScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:10;color:#fff;text-align:center}
-#startScreen h1{font-size:3em;color:#e94560;text-shadow:0 0 20px #e94560;margin-bottom:10px}
-#startScreen h2{font-size:1.2em;color:#ffd700;margin-bottom:30px}
-.btn{padding:15px 40px;font-size:1.3em;font-family:'Cairo';background:linear-gradient(135deg,#e94560,#c23152);color:#fff;border:none;border-radius:12px;cursor:pointer;margin:5px;transition:transform 0.2s}
-.btn:hover{transform:scale(1.1)}
-.hidden{display:none!important}
-#mobileControls{position:fixed;bottom:10px;left:0;width:100%;display:none;justify-content:space-between;padding:0 20px;z-index:5}
-.mBtn{width:70px;height:70px;border-radius:50%;background:rgba(233,69,96,0.5);border:2px solid #e94560;color:#fff;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-@media(max-width:800px){#mobileControls{display:flex!important}}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="game.css">
+<script src="assets.js"></script>
 </head>
 <body>
 
 <div id="startScreen">
-  <h1>🇯🇴 Mansaf Quest</h1>
+  <svg class="screen-icon" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="4" fill="#e94560"/><text x="16" y="22" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">MQ</text></svg>
+  <h1>Mansaf Quest</h1>
   <h2>اجمع مقادير المنسف قبل ما تجوع!</h2>
-  <p style="color:#aaa;margin-bottom:20px">رز • جميد • لبن • لحمة</p>
-  <button class="btn" onclick="startGame()">ابدأ اللعب 🎮</button>
+  <p class="ingredient-tags">رز • جميد • لبن • لحمة</p>
+  <button class="btn" onclick="startGame()">ابدأ اللعب</button>
   <p style="color:#777;margin-top:40px;font-size:0.9em">تطوير Ahmad AL Batayneh</p>
 </div>
 
 <div id="gameOverScreen" class="hidden">
-  <h1 style="font-size:2.5em;color:#e94560">💀 Game Over</h1>
+  <h1 style="font-size:2.5em;color:#e94560">Game Over</h1>
   <p id="goLevel" style="color:#aaa;font-size:1.2em;margin:15px 0"></p>
   <button class="btn" onclick="startGame()">حاول مرة ثانية</button>
 </div>
 
 <div id="winScreen" class="hidden">
-  <h1 style="font-size:2.5em;color:#ffd700">🎉 مبروك!</h1>
-  <p style="color:#fff;font-size:1.3em;margin:15px 0">جمعت كل مقادير المنسف! صحتين وعافية 🍲</p>
+  <h1 style="font-size:2.5em;color:#ffd700">مبروك!</h1>
+  <p style="color:#fff;font-size:1.3em;margin:15px 0">جمعت كل مقادير المنسف! صحتين وعافية</p>
   <button class="btn" onclick="startGame()">العب مرة ثانية</button>
 </div>
 
+<div id="gameWrap">
 <canvas id="gameCanvas"></canvas>
+<div id="hud" class="hidden">
+  <div class="hud-top">
+    <div class="hud-left">
+      <div class="hud-falafel" id="hudFalafelWrap">
+        <canvas id="hudFalafelIcon" class="hud-icon" width="16" height="16"></canvas>
+        <span id="hudFalafel">0/10</span>
+      </div>
+      <div class="hud-lives" id="hudLives"></div>
+    </div>
+    <div class="hud-level" id="hudLevel">مرحلة 1/16</div>
+    <div class="hud-ingredients" id="hudIngredients"></div>
+  </div>
+</div>
+</div>
 
 <div id="mobileControls">
   <button class="mBtn" id="btnLeft">◀</button>
@@ -53,14 +57,40 @@ body{background:#1a1a2e;display:flex;justify-content:center;align-items:center;h
 <script>
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const gameWrap = document.getElementById('gameWrap');
+const hudEl = document.getElementById('hud');
 
-// Responsive sizing
 function resize(){
   const s = Math.min(window.innerWidth/800, window.innerHeight/600, 1);
   canvas.width = 800; canvas.height = 600;
-  canvas.style.width = (800*s)+'px'; canvas.style.height = (600*s)+'px';
+  gameWrap.style.width = (800*s)+'px';
+  gameWrap.style.height = (600*s)+'px';
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
 }
 resize(); window.addEventListener('resize', resize);
+
+function initHudIcons(){
+  const falafelIcon = document.getElementById('hudFalafelIcon');
+  falafelIcon.getContext('2d').drawImage(Assets.icons.falafel, 0, 0, 16, 16);
+
+  const livesEl = document.getElementById('hudLives');
+  for(let i=0;i<3;i++){
+    const c = document.createElement('canvas');
+    c.className = 'hud-icon';
+    c.width = 16; c.height = 16;
+    livesEl.appendChild(c);
+  }
+
+  const ingEl = document.getElementById('hudIngredients');
+  for(const k of ['Jameed','Meat','Rice','Laban']){
+    const span = document.createElement('span');
+    span.dataset.ing = k;
+    span.textContent = `${INGREDIENT_NAMES[k]}: 0/4`;
+    ingEl.appendChild(span);
+  }
+}
+initHudIcons();
 
 // ========== GAME STATE ==========
 let GS = {};
@@ -86,7 +116,7 @@ function buildLevel(){
   camera = {x:0};
   const W = 3200, G = 570;
 
-  player = {x:60,y:G-48,w:28,h:44,vx:0,vy:0,onGround:false,facing:1,frame:0,frameT:0};
+  player = {x:60,y:G-48,w:32,h:44,vx:0,vy:0,onGround:false,facing:1,frame:0,frameT:0};
 
   // Ground is solid, some floating platforms move
   platforms = [{x:0,y:G,w:W,h:30,passThru:false,moving:false,vx:0,originX:0}];
@@ -163,62 +193,33 @@ function mTouch(el,key,cb){
 mTouch(mL,'l',v=>mLeft=v); mTouch(mR,'r',v=>mRight=v); mTouch(mJ,'j',v=>mJump=v);
 
 // ========== DRAW HELPERS ==========
-function drawPixelChar(x,y,w,h,starving){
-  // Body (jacket)
-  ctx.fillStyle = starving ? '#cc7a00' : '#1e6fbf';
-  ctx.fillRect(x,y+12,w,h-24);
-  // Jeans
-  ctx.fillStyle = '#2a4a7f';
-  ctx.fillRect(x+2,y+h-16,w/2-3,16);
-  ctx.fillRect(x+w/2+1,y+h-16,w/2-3,16);
-  // Head
-  ctx.fillStyle = '#deb887';
-  ctx.fillRect(x+4,y,w-8,14);
-  // Shemagh
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(x+2,y-4,w-4,8);
-  ctx.fillStyle = '#e94560';
-  for(let i=0;i<3;i++) ctx.fillRect(x+4+i*8,y-4,4,8);
-  // Eyes
-  ctx.fillStyle = '#000';
-  const eyeS = starving ? 4 : 3;
-  ctx.fillRect(x+8,y+4,eyeS,eyeS);
-  ctx.fillRect(x+w-8-eyeS,y+4,eyeS,eyeS);
-  if(starving){
-    ctx.fillStyle='#4af';
-    ctx.fillRect(x+10,y+10,2,3); // sweat
+function drawTilesRect(x, y, w, h, tile, isPlatform){
+  const ts = 16;
+  if(isPlatform){
+    Assets.drawTile(ctx, tile, x, y, w, h);
+    return;
   }
+  Assets.drawTile(ctx, Assets.tiles.ground, x, y, w, Math.min(h, ts));
+  if(h > ts) Assets.drawTile(ctx, Assets.tiles.ground, x, y + ts, w, h - ts);
 }
 
 function drawFalafel(x,y){
-  ctx.fillStyle='#d4a017';
-  ctx.beginPath(); ctx.arc(x+8,y+8,8,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#b8860b';
-  ctx.fillRect(x+4,y+4,3,3);
-  ctx.fillRect(x+10,y+9,3,3);
+  ctx.drawImage(Assets.falafel, x, y, 16, 16);
 }
 
 function drawIngredient(x,y,type){
-  ctx.fillStyle = INGREDIENT_COLORS[type];
-  ctx.fillRect(x,y,32,32);
-  ctx.strokeStyle='#ffd700'; ctx.lineWidth=2;
-  ctx.strokeRect(x,y,32,32);
+  ctx.drawImage(Assets.ingredients[type], x, y, 32, 32);
   ctx.fillStyle='#000'; ctx.font='10px Cairo';
   ctx.textAlign='center';
-  ctx.fillText(INGREDIENT_NAMES[type],x+16,y+20);
+  ctx.fillText(INGREDIENT_NAMES[type],x+16,y+28);
 }
 
 function drawObstacle(o){
   if(!o.alive)return;
-  const cols = ['#333','#8b0000','#555'];
-  ctx.fillStyle = cols[o.type];
-  ctx.fillRect(o.x-camera.x,o.y,o.w,o.h);
-  ctx.fillStyle='#ff6';ctx.font='8px monospace';ctx.textAlign='center';
-  const labels=['🕳️','☕','💨'];
-  ctx.fillText(labels[o.type],o.x-camera.x+o.w/2,o.y+o.h/2+3);
-  // Laser indicator
+  ctx.drawImage(Assets.enemies[o.type], o.x-camera.x, o.y, o.w, o.h);
   if(o.shoots){
-    ctx.fillStyle='#f00'; ctx.fillRect(o.x-camera.x+12,o.y-4,6,4);
+    ctx.fillStyle='#f00';
+    ctx.fillRect(o.x-camera.x+12,o.y-4,6,4);
   }
 }
 
@@ -231,19 +232,13 @@ function drawLaser(l){
 
 function drawLavaPit(pit){
   const px=pit.x-camera.x, G=570;
-  // Lava body
-  const grad=ctx.createLinearGradient(0,G,0,G+30);
-  grad.addColorStop(0,'#ff4500'); grad.addColorStop(0.5,'#ff6600'); grad.addColorStop(1,'#cc3300');
-  ctx.fillStyle=grad;
-  ctx.fillRect(px,G,pit.w,30);
-  // Bubbles
+  Assets.drawTile(ctx, Assets.tiles.lava, px, G, pit.w, 30);
   for(const b of pit.bubbles){
     ctx.fillStyle='rgba(255,200,0,0.7)';
     ctx.beginPath();
     ctx.arc(px+b.rx*pit.w, G+5+b.ry*15, b.s, 0, Math.PI*2);
     ctx.fill();
   }
-  // Glow
   ctx.fillStyle='rgba(255,69,0,0.15)';
   ctx.fillRect(px-5,G-20,pit.w+10,20);
 }
@@ -423,66 +418,51 @@ function updateObstacles(dt){
 
 // ========== DRAW ==========
 function drawBG(){
-  // Sky gradient based on level zone
   const zone = Math.floor((GS.level-1)/4);
-  const skies = [['#0f3460','#16213e'],['#4a2c17','#2c1810'],['#b7472a','#4a1a0a'],['#1a1a2e','#0a0a15']];
-  const s=skies[zone]||skies[0];
-  const grad=ctx.createLinearGradient(0,0,0,600);
-  grad.addColorStop(0,s[0]); grad.addColorStop(1,s[1]);
-  ctx.fillStyle=grad; ctx.fillRect(0,0,800,600);
+  Assets.drawParallax(ctx, zone, camera.x, 800, 600);
+}
 
-  // Pixel buildings/hills
-  ctx.fillStyle = 'rgba(255,255,255,0.07)';
-  for(let i=0;i<15;i++){
-    const bx=(i*200-camera.x*0.3)%900-50;
-    const bh=80+Math.sin(i*2.5)*60;
-    ctx.fillRect(bx,600-bh-30,60,bh);
-    ctx.fillRect(bx+10,600-bh-50,40,20);
+function updateHUD(){
+  const falafelWrap = document.getElementById('hudFalafelWrap');
+  const falafelText = document.getElementById('hudFalafel');
+  falafelText.textContent = `${GS.falafelCount}/10`;
+  falafelWrap.classList.toggle('complete', GS.falafelCount >= 10);
+
+  const livesEl = document.getElementById('hudLives');
+  for(let i=0;i<3;i++){
+    const c = livesEl.children[i];
+    const lctx = c.getContext('2d');
+    lctx.clearRect(0,0,16,16);
+    lctx.drawImage(i < GS.lives ? Assets.icons.heart : Assets.icons.heartEmpty, 0, 0, 16, 16);
+  }
+
+  document.getElementById('hudLevel').textContent = `مرحلة ${GS.level}/16`;
+
+  for(const span of document.getElementById('hudIngredients').children){
+    const k = span.dataset.ing;
+    const v = GS.ingredients[k];
+    span.textContent = `${INGREDIENT_NAMES[k]}: ${v}/4`;
+    span.classList.toggle('done', v >= 4);
   }
 }
 
-function drawHUD(){
-  ctx.save();
-  // Falafel count
-  ctx.fillStyle=GS.falafelCount>=10?'#0f0':'#fff';
-  ctx.font='bold 20px Cairo'; ctx.textAlign='left';
-  ctx.fillText(`🧆 فلافل: ${GS.falafelCount}/10`,15,30);
+function drawSpeechBubble(){
+  if(!GS.starvingTriggered || GS.lives !== 1) return;
+  GS.bubbleAlpha+=GS.bubbleDir*0.03;
+  if(GS.bubbleAlpha>1)GS.bubbleDir=-1;
+  if(GS.bubbleAlpha<0.4)GS.bubbleDir=1;
 
-  // Lives
-  ctx.fillStyle='#e94560';
-  ctx.fillText('❤'.repeat(GS.lives)+'🖤'.repeat(3-GS.lives),15,58);
-
-  // Level
-  ctx.fillStyle='#ffd700'; ctx.textAlign='center';
-  ctx.fillText(`مرحلة ${GS.level}/16`,400,30);
-
-  // Ingredients (top right)
-  ctx.textAlign='right'; ctx.font='16px Cairo';
-  let iy=22;
-  for(const [k,v] of Object.entries(GS.ingredients)){
-    ctx.fillStyle=v>=4?'#0f0':'#aaa';
-    ctx.fillText(`${INGREDIENT_NAMES[k]}: ${v}/4`,785,iy); iy+=22;
-  }
-
-  // Speech bubble when starving
-  if(GS.starvingTriggered&&GS.lives===1){
-    GS.bubbleAlpha+=GS.bubbleDir*0.03;
-    if(GS.bubbleAlpha>1)GS.bubbleDir=-1;
-    if(GS.bubbleAlpha<0.4)GS.bubbleDir=1;
-
-    const bx=player.x-camera.x, by=player.y-50;
-    ctx.globalAlpha=GS.bubbleAlpha;
-    ctx.fillStyle='#fffdd0';
-    ctx.strokeStyle='#e94560'; ctx.lineWidth=2;
-    const tw=200;
-    ctx.beginPath();
-    ctx.roundRect(bx-tw/2,by-30,tw,28,8);
-    ctx.fill(); ctx.stroke();
-    ctx.fillStyle='#000'; ctx.font='bold 13px Cairo'; ctx.textAlign='center';
-    ctx.fillText('يزم علامك ودنا نتغدا!',bx,by-10);
-    ctx.globalAlpha=1;
-  }
-  ctx.restore();
+  const bx=player.x-camera.x, by=player.y-50;
+  ctx.globalAlpha=GS.bubbleAlpha;
+  ctx.fillStyle='#fffdd0';
+  ctx.strokeStyle='#e94560'; ctx.lineWidth=2;
+  const tw=200;
+  ctx.beginPath();
+  ctx.roundRect(bx-tw/2,by-30,tw,28,8);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#000'; ctx.font='bold 13px Cairo'; ctx.textAlign='center';
+  ctx.fillText('يزم علامك ودنا نتغدا!',bx,by-10);
+  ctx.globalAlpha=1;
 }
 
 function draw(){
@@ -499,31 +479,20 @@ function draw(){
     const px=p.x-cx;
     if(px>-200&&px<1000){
       if(p.passThru){
-        // Solid styled floating platforms
-        ctx.fillStyle='#7a6252';
-        ctx.fillRect(px,p.y,p.w,p.h);
-        ctx.fillStyle='#9a8272';
-        ctx.fillRect(px,p.y,p.w,3);
-        ctx.fillStyle='#5a4a3a';
-        ctx.fillRect(px,p.y+p.h-2,p.w,2);
+        drawTilesRect(px, p.y, p.w, p.h, Assets.tiles.platform, true);
       } else {
-        // Solid ground - but skip lava pit areas
-        ctx.fillStyle='#555';
-        // Draw ground in segments around pits
         let sx=p.x, sw=p.w;
         for(const pit of lavaPits){
           if(sx<pit.x && sx+sw>pit.x){
-            ctx.fillRect(sx-cx,p.y,pit.x-sx,p.h);
+            drawTilesRect(sx-cx, p.y, pit.x-sx, p.h, Assets.tiles.ground, false);
             const endPit=pit.x+pit.w;
             if(sx+sw>endPit){
-              ctx.fillRect(endPit-cx,p.y,sx+sw-endPit,p.h);
+              drawTilesRect(endPit-cx, p.y, sx+sw-endPit, p.h, Assets.tiles.ground, false);
             }
             sx=pit.x+pit.w; sw=p.x+p.w-sx;
           }
         }
-        if(sw>0) ctx.fillRect(sx-cx,p.y,sw,p.h);
-        ctx.fillStyle='#8a7a6a';
-        ctx.fillRect(p.x-cx,p.y,p.w,3);
+        if(sw>0) drawTilesRect(sx-cx, p.y, sw, p.h, Assets.tiles.ground, false);
       }
     }
   }
@@ -537,10 +506,7 @@ function draw(){
   }
 
   // Door
-  ctx.fillStyle='#8b4513';
-  ctx.fillRect(door.x-cx,door.y,door.w,door.h);
-  ctx.fillStyle='#ffd700';ctx.font='12px Cairo';ctx.textAlign='center';
-  ctx.fillText('🚪',door.x-cx+25,door.y+40);
+  ctx.drawImage(Assets.door, door.x-cx, door.y, door.w, door.h);
 
   // Obstacles & Lasers
   for(const o of obstacles)drawObstacle(o);
@@ -555,18 +521,12 @@ function draw(){
   }
 
   ctx.save();
-  if(player.facing===-1){
-    ctx.translate(px+player.w,0);
-    ctx.scale(-1,1);
-    drawPixelChar(0,py,player.w,player.h,starving);
-  } else {
-    drawPixelChar(px,py,player.w,player.h,starving);
-  }
+  Assets.drawPlayer(ctx, px, py, player.frame, starving, player.facing);
   ctx.restore();
   ctx.globalAlpha=1;
 
-  // HUD
-  drawHUD();
+  updateHUD();
+  drawSpeechBubble();
 }
 
 // ========== GAME LOOP ==========
@@ -586,13 +546,23 @@ function gameLoop(ts){
 }
 
 // ========== SCREENS ==========
+function showScreen(id){
+  const screens = ['startScreen','gameOverScreen','winScreen'];
+  const apply = () => {
+    screens.forEach(s => document.getElementById(s).classList.add('hidden'));
+    if(id) document.getElementById(id).classList.remove('hidden');
+    hudEl.classList.toggle('hidden', id !== null);
+  };
+  if(document.startViewTransition) document.startViewTransition(apply);
+  else apply();
+}
+
 function startGame(){
-  document.getElementById('startScreen').classList.add('hidden');
-  document.getElementById('gameOverScreen').classList.add('hidden');
-  document.getElementById('winScreen').classList.add('hidden');
+  showScreen(null);
   resetGS();
   GS.running=true;
   buildLevel();
+  updateHUD();
   lastTime=performance.now();
   requestAnimationFrame(gameLoop);
 }
@@ -600,12 +570,12 @@ function startGame(){
 function gameOver(){
   GS.running=false;
   document.getElementById('goLevel').textContent=`وصلت مرحلة ${GS.level}`;
-  document.getElementById('gameOverScreen').classList.remove('hidden');
+  showScreen('gameOverScreen');
 }
 
 function winGame(){
   GS.running=false;
-  document.getElementById('winScreen').classList.remove('hidden');
+  showScreen('winScreen');
 }
 </script>
 </body>

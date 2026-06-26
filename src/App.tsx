@@ -39,10 +39,20 @@ const games = [
   { title: "Slingshot", path: "./slingshot/dist/index.html" }
 ];
 
+function selectWithTransition(update: () => void) {
+  if (document.startViewTransition) {
+    document.startViewTransition(update);
+  } else {
+    update();
+  }
+}
+
 function App() {
   const [currentGame, setCurrentGame] = useState<{ title: string, path: string } | null>(null);
 
-  console.log("App rendering, current game:", currentGame?.title || "none");
+  const handleSelectGame = (game: { title: string; path: string }) => {
+    selectWithTransition(() => setCurrentGame(game));
+  };
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -75,7 +85,7 @@ function App() {
             <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">قائمة الألعاب</h2>
             <div className="flex flex-col gap-4">
               {games.map((game, index) => (
-                <div key={index} className="w-full" onClick={() => setCurrentGame(game)}>
+                <div key={index} className="w-full" onClick={() => handleSelectGame(game)}>
                   <LiquidMetalButton
                     label={game.title}
                     viewMode="text"
@@ -103,13 +113,13 @@ function App() {
               )}
             </div>
 
-            <div className="flex-1 bg-black/60 rounded-xl overflow-hidden min-h-[500px] border border-white/5 relative">
+            <div className="flex-1 bg-black/60 rounded-xl overflow-hidden min-h-[500px] border border-white/5 relative game-player-frame">
               {currentGame ? (
                 <iframe
                   key={currentGame.path}
                   title="game-player"
                   src={currentGame.path}
-                  className="w-full h-full absolute inset-0"
+                  className="w-full h-full absolute inset-0 game-player-frame"
                   sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock"
                   referrerPolicy="no-referrer"
                 />

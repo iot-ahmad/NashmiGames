@@ -32,19 +32,24 @@ const openNewTabBtn = document.getElementById("open-new-tab");
 
 let currentGamePath = "";
 
-// وظيفة اختيار اللعبة وتشغيلها
-function selectGame(game, button) {
+function applyGameSelection(game, button) {
   currentGamePath = game.path;
   gameFrame.src = game.path;
   gameTitle.textContent = `تلعب الآن: ${game.title}`;
   openNewTabBtn.disabled = false;
 
-  // إزالة التحديد عن الأزرار الأخرى
   document.querySelectorAll(".game-btn").forEach((btn) => {
     btn.classList.remove("active");
   });
-  // تحديد الزر الحالي
   button.classList.add("active");
+}
+
+function selectGame(game, button) {
+  if (document.startViewTransition) {
+    document.startViewTransition(() => applyGameSelection(game, button));
+  } else {
+    applyGameSelection(game, button);
+  }
 }
 
 // بناء القائمة عند تحميل الصفحة
