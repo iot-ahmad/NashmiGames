@@ -84,8 +84,6 @@
 </div>
 </div>
 
-<!-- Particle overlay canvas -->
-<canvas id="particleCanvas"></canvas>
 
 <div id="mobileControls">
   <button class="mBtn" id="btnLeft" aria-label="يسار">◀</button>
@@ -117,68 +115,6 @@ spawnStars('starfield', 80);
 spawnStars('starfieldGO', 50);
 spawnStars('starfieldWin', 50);
 
-// ===== PARTICLE SYSTEM =====
-const pCanvas = document.getElementById('particleCanvas');
-const pCtx = pCanvas.getContext('2d');
-let particles = [];
-function resizeParticleCanvas() {
-  pCanvas.width = window.innerWidth;
-  pCanvas.height = window.innerHeight;
-}
-resizeParticleCanvas();
-window.addEventListener('resize', resizeParticleCanvas);
-
-function spawnParticles(wx, wy, color) {
-  // wx, wy = world-to-screen position
-  for (let i = 0; i < 10; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 60 + Math.random() * 120;
-    particles.push({
-      x: wx, y: wy,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 60,
-      life: 1.0,
-      decay: 0.9 + Math.random() * 0.6,
-      size: 3 + Math.random() * 4,
-      color: color || '#ffd700'
-    });
-  }
-}
-
-let lastPTime = 0;
-function animParticles(ts) {
-  const dt = Math.min((ts - lastPTime) / 1000, 0.05);
-  lastPTime = ts;
-  pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
-  for (let i = particles.length - 1; i >= 0; i--) {
-    const p = particles[i];
-    p.x += p.vx * dt;
-    p.y += p.vy * dt;
-    p.vy += 250 * dt;
-    p.life -= p.decay * dt;
-    if (p.life <= 0) { particles.splice(i, 1); continue; }
-    pCtx.globalAlpha = p.life;
-    pCtx.fillStyle = p.color;
-    pCtx.beginPath();
-    pCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-    pCtx.fill();
-  }
-  pCtx.globalAlpha = 1;
-  requestAnimationFrame(animParticles);
-}
-requestAnimationFrame(animParticles);
-
-// Helper: world coords -> screen coords
-function worldToScreen(wx, wy) {
-  const wrap = document.getElementById('gameWrap');
-  const rect = wrap.getBoundingClientRect();
-  const scaleX = rect.width / 800;
-  const scaleY = rect.height / 600;
-  return {
-    x: rect.left + (wx) * scaleX,
-    y: rect.top  + (wy) * scaleY
-  };
-}
 
 
 const canvas = document.getElementById('gameCanvas');
@@ -444,8 +380,6 @@ function checkCollisions(){
     if(!f.alive)continue;
     if(player.x+player.w>f.x&&player.x<f.x+f.w&&player.y+player.h>f.y&&player.y<f.y+f.h){
       f.alive=false; GS.falafelCount++;
-      // Particle burst on falafel collect
-      try { const scF = worldToScreen(f.x - camera.x + 8, f.y + 8); spawnParticles(scF.x, scF.y, '#ffd700'); } catch(e){}
       if(GS.falafelCount>=10&&!majorItem.visible){majorItem.visible=true;}
     }
   }
@@ -457,12 +391,6 @@ function checkCollisions(){
       majorItem.alive=false;
       const type=INGREDIENT_MAP[GS.level-1];
       GS.ingredients[type]++;
-      // Big particle burst for ingredient
-      try {
-        const scI = worldToScreen(majorItem.x - camera.x + 16, majorItem.y + 16);
-        const ingColors = {Jameed:'#c8b560',Meat:'#e05040',Rice:'#ffffaa',Laban:'#aaeeff'};
-        for(let b=0;b<3;b++) spawnParticles(scI.x, scI.y, ingColors[type]);
-      } catch(e){}
     }
   }
 
@@ -670,27 +598,11 @@ function gameLoop(ts){
   const dt=Math.min((ts-lastTime)/1000, 0.05);
   lastTime=ts;
 
-  try {
-    updatePlayer(dt);
-    updateObstacles(dt);
-    if(invulnTimer>0)invulnTimer-=dt;
-    checkCollisions();
-    draw();
-  } catch(err) {
-    // Show error on canvas for debugging
-    ctx.fillStyle='rgba(0,0,0,0.85)';
-    ctx.fillRect(0,0,800,600);
-    ctx.fillStyle='#e94560';
-    ctx.font='bold 16px Cairo';
-    ctx.textAlign='left';
-    ctx.fillText('JS ERROR: ' + err.message, 10, 30);
-    ctx.fillStyle='#fff';
-    ctx.font='12px monospace';
-    const lines = (err.stack||'').split('\n');
-    lines.forEach((l,i) => ctx.fillText(l.slice(0,90), 10, 55 + i*18));
-    GS.running = false;
-    return;
-  }
+  updatePlayer(dt);
+  updateObstacles(dt);
+  if(invulnTimer>0)invulnTimer-=dt;
+  checkCollisions();
+  draw();
 
   requestAnimationFrame(gameLoop);
 }
@@ -719,29 +631,13 @@ function startGame(){
 
 function gameOver(){
   GS.running=false;
-  const lvlEl = document.getElementById('goLevel');
-  lvlEl.innerHTML = `وصلت مرحلة <strong style="color:#ffd700">${GS.level}</strong> من 16`;
+  document.getElementById('goLevel').textContent=`وصلت مرحلة ${GS.level}`;
   showScreen('gameOverScreen');
 }
 
 function winGame(){
   GS.running=false;
-  // Update win stats display
-  document.getElementById('statJameed').textContent = `${GS.ingredients.Jameed}/4`;
-  document.getElementById('statMeat').textContent   = `${GS.ingredients.Meat}/4`;
-  document.getElementById('statRice').textContent   = `${GS.ingredients.Rice}/4`;
-  document.getElementById('statLaban').textContent  = `${GS.ingredients.Laban}/4`;
   showScreen('winScreen');
-  // Confetti burst!
-  for(let i=0;i<8;i++){
-    setTimeout(()=>{
-      spawnParticles(
-        Math.random()*window.innerWidth,
-        Math.random()*window.innerHeight*0.5,
-        ['#ffd700','#ff6b80','#aaffaa','#80cfff','#ffaa00'][Math.floor(Math.random()*5)]
-      );
-    }, i*200);
-  }
 }
 </script>
 </body>

@@ -533,10 +533,4 @@ body {
   border-radius: 2px;
 }
 
-/* ===== FLOATING PARTICLES (canvas overlay - injected by JS) ===== */
-#particleCanvas {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9;
-}
+
