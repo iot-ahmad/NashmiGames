@@ -32,7 +32,7 @@ const games = [
   "remix_-irbid-runner",
   "slingshot",
   "sun-temple-runner",
-  "zmrt-laab-Grf-Multiplayer (1)"
+  "zmrt-game"
 ];
 
 console.log("Copying game assets to dist...");

@@ -37,7 +37,7 @@ const games = [
   { title: "Multiplayer Neon Snake", path: "./spell-caster/multiplayer-neon-snake/dist/index.html" },
   { title: "Slingshot", path: "./slingshot/dist/index.html" },
   { title: "Sun Temple Runner", path: "./sun-temple-runner/dist/public/index.html" },
-  { title: "زمرت — لعبة غرف الفواكه", path: "./zmrt-laab-Grf-Multiplayer (1)/zmrt-laab-Grf-Multiplayer/artifacts/zamrat/dist/public/index.html" }
+  { title: "زمرت — لعبة غرف الفواكه", path: "./zmrt-game/index.html" }
 ];
 
 function selectWithTransition(update: () => void) {

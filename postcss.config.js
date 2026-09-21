@@ -4,6 +4,7 @@ export default (ctx) => {
 
   // Check if the stylesheet belongs to a game subfolder or pre-compiled dist asset
   const isGameCss = (file || decodedFile) && (
+    decodedFile.includes('zmrt-game') ||
     decodedFile.includes('zmrt-laab-Grf-Multiplayer') ||
     decodedFile.includes('sun-temple-runner') ||
     decodedFile.includes('slingshot') ||
