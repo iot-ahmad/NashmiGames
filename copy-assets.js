@@ -30,7 +30,9 @@ const games = [
   "xo-game",
   "classic-two-player-chess",
   "remix_-irbid-runner",
-  "slingshot"
+  "slingshot",
+  "sun-temple-runner",
+  "zmrt-laab-Grf-Multiplayer (1)"
 ];
 
 console.log("Copying game assets to dist...");
