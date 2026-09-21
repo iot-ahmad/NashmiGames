@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm --prefix slingshot install && npm --prefix slingshot run build && npm --prefix sun-temple-runner install && npm --prefix sun-temple-runner run build:client && vite build && node copy-assets.js",
+    "build": "npm --prefix slingshot install --legacy-peer-deps && npm --prefix slingshot run build && npm --prefix sun-temple-runner install --legacy-peer-deps && npm --prefix sun-temple-runner run build:client && vite build && node copy-assets.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },
