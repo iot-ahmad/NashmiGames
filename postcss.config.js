@@ -1,21 +1,24 @@
 export default (ctx) => {
-  // Check if the stylesheet belongs to a game subfolder or pre-compiled asset
-  const normalizedFile = ctx.file ? ctx.file.replace(/\\/g, '/') : '';
-  const isGameCss = normalizedFile && (
-    normalizedFile.includes('zmrt-laab-Grf-Multiplayer') ||
-    normalizedFile.includes('sun-temple-runner') ||
-    normalizedFile.includes('slingshot') ||
-    normalizedFile.includes('spell-caster') ||
-    normalizedFile.includes('multiplayer-neon-snake') ||
-    normalizedFile.includes('remix_-irbid-runner') ||
-    normalizedFile.includes('classic-two-player-chess') ||
-    normalizedFile.includes('snake-game_tcw') ||
-    !normalizedFile.includes('/src/')
+  const file = ctx.file ? ctx.file.replace(/\\/g, '/') : '';
+  const decodedFile = decodeURIComponent(file);
+
+  // Check if the stylesheet belongs to a game subfolder or pre-compiled dist asset
+  const isGameCss = (file || decodedFile) && (
+    decodedFile.includes('zmrt-laab-Grf-Multiplayer') ||
+    decodedFile.includes('sun-temple-runner') ||
+    decodedFile.includes('slingshot') ||
+    decodedFile.includes('spell-caster') ||
+    decodedFile.includes('multiplayer-neon-snake') ||
+    decodedFile.includes('remix_-irbid-runner') ||
+    decodedFile.includes('classic-two-player-chess') ||
+    decodedFile.includes('snake-game_tcw') ||
+    decodedFile.includes('/artifacts/') ||
+    decodedFile.includes('/dist/')
   );
 
   if (isGameCss) {
     return {
-      plugins: [], // EXPLICITLY USE AN EMPTY ARRAY to disable all PostCSS plugins for game assets!
+      plugins: [], // Disable PostCSS plugins for pre-compiled game assets
     };
   }
 
