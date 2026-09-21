@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
-import { WebGLShader } from '@/components/ui/webgl-shader';
-import { LiquidMetalButton } from '@/components/ui/liquid-metal-button';
-import { ExternalLink } from 'lucide-react';
+import { SublevelStudioLandingPage } from '@designcodeio/threeui';
+import '@designcodeio/threeui/style.css';
+import { ExternalLink, X } from 'lucide-react';
 import './index.css';
 
 const games = [
@@ -31,7 +31,6 @@ const games = [
   { title: "Ultimate Ride", path: "./ultimate-ride/ultimate-ride/dist/index.html" },
   { title: "VR Sonic", path: "./VR Sonic/index.html" },
   { title: "XO Game", path: "./xo-game/index.html" },
-  // Newly added games
   { title: "Classic Two Player Chess", path: "./classic-two-player-chess/dist/index.html" },
   { title: "Irbid Runner", path: "./remix_-irbid-runner/dist/index.html" },
   { title: "Voxel Architect", path: "./snake-game_tcw/voxel-toy-box/dist/index.html" },
@@ -47,91 +46,108 @@ function selectWithTransition(update: () => void) {
   }
 }
 
+function Scene() {
+  return (
+    <div className="shader-frame">
+      <SublevelStudioLandingPage
+        backgroundCanvasSelector="#canvas-container"
+        style={{ width: '100%', height: '100%' }}
+      />
+    </div>
+  );
+}
+
 function App() {
-  const [currentGame, setCurrentGame] = useState<{ title: string, path: string } | null>(null);
+  const [currentGame, setCurrentGame] = useState<{ title: string; path: string } | null>(null);
 
   const handleSelectGame = (game: { title: string; path: string }) => {
     selectWithTransition(() => setCurrentGame(game));
   };
 
+  const closePlayer = () => {
+    selectWithTransition(() => setCurrentGame(null));
+  };
+
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <WebGLShader />
+      <Scene />
 
-      <div className="min-h-screen p-8 text-foreground" dir="rtl">
-        <header className="mb-12 text-center relative flex flex-col items-center justify-center min-h-[300px]">
-          {/* Logo in the background */}
-          <div className="absolute inset-0 flex justify-center items-center pointer-events-none z-0">
-            <img 
-              src="./image.png" 
-              alt="Nashmi Logo" 
-              className="w-64 h-64 md:w-80 md:h-80 object-contain opacity-80 drop-shadow-[0_0_40px_rgba(134,59,255,0.6)] mix-blend-screen" 
-            />
-          </div>
-          
-          {/* Text in the foreground */}
-          <div className="relative z-10 flex flex-col items-center mt-8">
-            <h1 className="text-6xl font-black tracking-tight lg:text-8xl mb-6 text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.9)]">
-              Nashmi Games
+      <div className="site-shell min-h-screen text-foreground" dir="rtl">
+        <header className="site-header mb-10 text-center relative flex flex-col items-center justify-center pt-10 pb-6 px-4">
+          <div className="relative z-10 flex flex-col items-center gap-6">
+            <h1 className="font-pixel text-xl sm:text-2xl md:text-3xl text-white drop-shadow-[0_0_0_2px_#000,0_4px_0_#000,0_4px_24px_rgba(0,0,0,0.85)] uppercase">
+              Zenith Games
             </h1>
-            <p className="text-xl text-white font-semibold bg-black/40 px-6 py-2 rounded-full backdrop-blur-md border border-white/20 shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+            <p className="text-base sm:text-lg text-white/90 font-medium bg-black/50 px-5 py-2 rounded-full backdrop-blur-md border border-white/15 max-w-xl">
               اختار اللعبة اللي بدك ياها والعب مباشرة
             </p>
           </div>
         </header>
 
-        <main className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-10">
-          <aside className="w-full lg:w-1/3 p-6 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shadow-2xl overflow-y-auto max-h-[70vh] custom-scrollbar">
-            <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">قائمة الألعاب</h2>
-            <div className="flex flex-col gap-4">
-              {games.map((game, index) => (
-                <div key={index} className="w-full" onClick={() => handleSelectGame(game)}>
-                  <LiquidMetalButton
-                    label={game.title}
-                    viewMode="text"
-                  />
-                </div>
-              ))}
-            </div>
-          </aside>
+        <main className="max-w-7xl mx-auto px-4 pb-16">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+            {games.map((game) => (
+              <button
+                key={game.path}
+                type="button"
+                onClick={() => handleSelectGame(game)}
+                className={`game-card font-pixel group text-right rounded-xl border p-4 min-h-[96px] flex flex-col justify-center transition-all duration-200 ${
+                  currentGame?.path === game.path
+                    ? 'border-white/40 bg-white/15 shadow-lg shadow-black/40'
+                    : 'border-white/10 bg-black/45 hover:border-white/25 hover:bg-black/55 backdrop-blur-md'
+                }`}
+              >
+                <span className="text-[8px] sm:text-[9px] text-white group-hover:text-white">
+                  {game.title}
+                </span>
+              </button>
+            ))}
+          </div>
+        </main>
 
-          <section className="w-full lg:w-2/3 p-6 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shadow-2xl flex flex-col">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold">
-                {currentGame ? `تلعب الآن: ${currentGame.title}` : "اختَر لعبة من القائمة"}
+        {currentGame && (
+          <div
+            className="game-player-overlay fixed inset-0 z-50 flex flex-col bg-black/80 backdrop-blur-sm p-4 sm:p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-label={currentGame.title}
+          >
+            <div className="flex justify-between items-center gap-4 mb-4 max-w-6xl w-full mx-auto">
+              <h2 className="font-pixel text-xs sm:text-sm text-white truncate max-w-[min(100%,28rem)]">
+                {currentGame.title}
               </h2>
-              {currentGame && (
+              <div className="flex items-center gap-2 shrink-0">
                 <a
                   href={currentGame.path}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 transition-colors rounded-lg text-sm"
+                  className="flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 transition-colors rounded-lg text-sm text-white"
                 >
-                  افتح في تبويب جديد
+                  تبويب جديد
                   <ExternalLink size={16} />
                 </a>
-              )}
+                <button
+                  type="button"
+                  onClick={closePlayer}
+                  className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                  aria-label="إغلاق"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
-
-            <div className="flex-1 bg-black/60 rounded-xl overflow-hidden min-h-[500px] border border-white/5 relative game-player-frame">
-              {currentGame ? (
-                <iframe
-                  key={currentGame.path}
-                  title="game-player"
-                  src={currentGame.path}
-                  className="w-full h-full absolute inset-0 game-player-frame"
-                  sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-muted-foreground flex-col gap-4">
-                  <div className="text-6xl animate-bounce mt-20">🎮</div>
-                  <p>الرجاء اختيار لعبة للبدء</p>
-                </div>
-              )}
+            <div className="flex-1 max-w-6xl w-full mx-auto min-h-0 rounded-xl overflow-hidden border border-white/10 bg-black game-player-frame">
+              <iframe
+                key={currentGame.path}
+                title="game-player"
+                src={currentGame.path}
+                className="w-full h-full min-h-[50vh] game-player-frame"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock"
+                referrerPolicy="no-referrer"
+              />
             </div>
-          </section>
-        </main>
+          </div>
+        )}
       </div>
     </ThemeProvider>
   );

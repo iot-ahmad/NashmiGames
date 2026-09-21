@@ -91,3 +91,39 @@
 .game-player-frame {
   view-transition-name: game-player;
 }
+
+.shader-frame {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.shader-frame .landing-page-frame,
+.shader-frame iframe {
+  pointer-events: none !important;
+}
+
+.site-shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+.site-header {
+  pointer-events: none;
+}
+
+.site-shell main,
+.site-shell .game-card,
+.game-player-overlay {
+  pointer-events: auto;
+}
+
+.font-pixel {
+  font-family: "Press Start 2P", cursive;
+  letter-spacing: 0.02em;
+  line-height: 1.65;
+}
