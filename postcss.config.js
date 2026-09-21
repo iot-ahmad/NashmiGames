@@ -1,11 +1,16 @@
 export default (ctx) => {
-  // Check if the stylesheet belongs to a game subfolder
-  const isGameCss = ctx.file && (
-    ctx.file.includes('spell-caster') ||
-    ctx.file.includes('multiplayer-neon-snake') ||
-    ctx.file.includes('remix_-irbid-runner') ||
-    ctx.file.includes('classic-two-player-chess') ||
-    ctx.file.includes('snake-game_tcw')
+  // Check if the stylesheet belongs to a game subfolder or pre-compiled asset
+  const normalizedFile = ctx.file ? ctx.file.replace(/\\/g, '/') : '';
+  const isGameCss = normalizedFile && (
+    normalizedFile.includes('zmrt-laab-Grf-Multiplayer') ||
+    normalizedFile.includes('sun-temple-runner') ||
+    normalizedFile.includes('slingshot') ||
+    normalizedFile.includes('spell-caster') ||
+    normalizedFile.includes('multiplayer-neon-snake') ||
+    normalizedFile.includes('remix_-irbid-runner') ||
+    normalizedFile.includes('classic-two-player-chess') ||
+    normalizedFile.includes('snake-game_tcw') ||
+    !normalizedFile.includes('/src/')
   );
 
   if (isGameCss) {
