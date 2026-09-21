@@ -11,9 +11,9 @@ import type { ActionName, EntityKind, GameMode, RunEntity } from "./types";
 const LANE_WIDTH = 3.9;
 const ROAD_LENGTH = 13;
 const ROAD_COUNT = 14;
-const BASE_SPEED = 14;
-const MAX_SPEED = 34;
-const SPEED_RAMP = 300;
+const BASE_SPEED = 20;
+const MAX_SPEED = 50;
+const SPEED_RAMP = 280;
 const DISTANCE_MULT = 1.92;
 const LANE_SNAP = 18;
 const c = (hex: string) => Color3.FromHexString(hex);
@@ -677,6 +677,14 @@ export class GameWorld {
   }
 
   private animateExplorer(dt: number) {
+    // Hide player off-screen when not running
+    if (this.mode !== "running") {
+      this.player.position.x = 0;
+      this.player.position.y = -20; // move below the floor
+      this.shadowDisc.position.y = -20;
+      return;
+    }
+
     this.playerX += (this.targetLane * LANE_WIDTH - this.playerX) * Math.min(1, dt * LANE_SNAP);
     this.player.position.x = this.playerX;
     this.player.rotation.z = (this.targetLane * LANE_WIDTH - this.playerX) * -0.09;
@@ -692,7 +700,7 @@ export class GameWorld {
     this.playerBody.position.y = slide ? -0.2 : 0;
     this.scarf.position.y = slide ? -0.1 : 0;
 
-    const runCycle = this.mode === "running" ? Math.sin(this.elapsed * (9 + this.speed * 0.32)) : 0;
+    const runCycle = Math.sin(this.elapsed * (9 + this.speed * 0.32));
     this.leftLeg.rotation.x = runCycle * 0.82;
     this.rightLeg.rotation.x = -runCycle * 0.82;
     this.leftArm.rotation.x = -runCycle * 0.55;
