@@ -22,7 +22,8 @@ const games = [
   { title: "Tetris Arcade", path: "./tetris-arcade-gameatari-1988/tetris-arcade-gameatari-1988/dist/index.html" },
   { title: "Ultimate Ride", path: "./ultimate-ride/ultimate-ride/dist/index.html" },
   { title: "VR Sonic", path: "./VR Sonic/index.html" },
-  { title: "XO Game", path: "./xo-game/index.html" }
+  { title: "XO Game", path: "./xo-game/index.html" },
+  { title: "لعبة حرف اسم", path: "https://letter-game-1.onrender.com/" }
 ];
 
 const gamesList = document.getElementById("games-list");

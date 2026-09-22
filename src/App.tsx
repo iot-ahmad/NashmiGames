@@ -1,9 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
-import { SublevelStudioLandingPage } from '@designcodeio/threeui';
-import '@designcodeio/threeui/style.css';
 import { ExternalLink, X } from 'lucide-react';
 import './index.css';
+
+const LazySublevelStudioLandingPage = lazy(() =>
+  import('@designcodeio/threeui').then((mod) => {
+    // Dynamically load style if needed
+    import('@designcodeio/threeui/style.css');
+    return { default: mod.SublevelStudioLandingPage };
+  })
+);
 
 const games = [
   { title: "Cobb Can Move", path: "./Cobb-Can-Move/index.html" },
@@ -37,7 +43,8 @@ const games = [
   { title: "Multiplayer Neon Snake", path: "./spell-caster/multiplayer-neon-snake/dist/index.html" },
   { title: "Slingshot", path: "./slingshot/dist/index.html" },
   { title: "Sun Temple Runner", path: "./sun-temple-runner/dist/public/index.html" },
-  { title: "زمرت — لعبة غرف الفواكه", path: "./zmrt-game/index.html" }
+  { title: "زمرت — لعبة غرف الفواكه", path: "./zmrt-game/index.html" },
+  { title: "لعبة حرف اسم", path: "https://letter-game-1.onrender.com/" }
 ];
 
 function selectWithTransition(update: () => void) {
@@ -48,13 +55,34 @@ function selectWithTransition(update: () => void) {
   }
 }
 
-function Scene() {
+function Scene({ isPlaying }: { isPlaying: boolean }) {
+  const [shouldLoad3D, setShouldLoad3D] = useState(false);
+
+  useEffect(() => {
+    // Delay loading the heavy 3D WebGL engine until the main UI is painted and idle
+    const timer = setTimeout(() => {
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(() => setShouldLoad3D(true));
+      } else {
+        setShouldLoad3D(true);
+      }
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="shader-frame">
-      <SublevelStudioLandingPage
-        backgroundCanvasSelector="#canvas-container"
-        style={{ width: '100%', height: '100%' }}
-      />
+    <div className="shader-frame" style={{ visibility: isPlaying ? 'hidden' : 'visible' }}>
+      {shouldLoad3D ? (
+        <Suspense fallback={<div className="shader-placeholder" />}>
+          <LazySublevelStudioLandingPage
+            backgroundCanvasSelector="#canvas-container"
+            style={{ width: '100%', height: '100%' }}
+          />
+        </Suspense>
+      ) : (
+        <div className="shader-placeholder" />
+      )}
     </div>
   );
 }
@@ -72,7 +100,7 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <Scene />
+      <Scene isPlaying={Boolean(currentGame)} />
 
       <div className="site-shell min-h-screen text-foreground" dir="rtl">
         <header className="site-header mb-10 text-center relative flex flex-col items-center justify-center pt-10 pb-6 px-4">
